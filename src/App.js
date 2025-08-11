@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Style from "./App.css"
-
+import CSS from "./App.css"
 
 const App = () => {
   const [allCountries, setAllCountries] = useState([]);
@@ -19,8 +18,14 @@ const App = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setAllCountries(data);
-        setFilteredCountries(data);
+        
+        const formattedData = data.map(country => ({
+            name: country.common,
+            flag: country.png,
+        }));
+        
+        setAllCountries(formattedData);
+        setFilteredCountries(formattedData);
       } catch (e) {
         console.error("Error fetching country data:", e);
         setError("Failed to load countries. Please try again later.");
@@ -32,7 +37,6 @@ const App = () => {
     fetchCountries();
   }, []); 
 
-
   const filterCountries = (term, countries) => {
     if (!term) {
       return countries;
@@ -41,7 +45,7 @@ const App = () => {
     const regex = new RegExp(term, 'i');
     
     return countries.filter(country => 
-      regex.test(country.common)
+      regex.test(country.name)
     );
   };
 
@@ -55,32 +59,30 @@ const App = () => {
 
   const renderContent = () => {
     if (loading) {
-      return <p className="text-xl text-center text-gray-500">Loading countries...</p>;
+      return <p className="text-xl text-center text-gray-500 font-inter">Loading countries...</p>;
     }
 
     if (error) {
-      return <p className="text-xl text-center text-red-500">{error}</p>;
+      return <p className="text-xl text-center text-red-500 font-inter">{error}</p>;
     }
 
     if (filteredCountries.length === 0) {
-      return <p className="text-xl text-center text-gray-500">No countries found matching your search.</p>;
+      return <p className="text-xl text-center text-gray-500 font-inter">No countries found matching your search.</p>;
     }
 
     return (
       <div className="countries-grid">
-       
         {filteredCountries.map((country) => (
-         
-          <div key={country.common} className="country-card-container">
-            <div className="country-card">
+          <div key={country.name} className="country-card-container">
+            <div className="countryCard">
               <img
-                src={country.png}
-                alt={`Flag of ${country.common}`}
+                src={country.flag}
+                alt={`${country.name} flag`}
                 className="country-flag"
-                onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/400x200/cccccc/000000?text=No+Flag"; }}
+                onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/400x160/cccccc/000000?text=No+Flag"; }}
               />
               <div className="country-info">
-                <p className="country-name">{country.common}</p>
+                <p className="country-name">{country.name}</p>
               </div>
             </div>
           </div>
@@ -90,7 +92,7 @@ const App = () => {
   };
 
   return (
-     <div className="app-container">
+      <div className="app-container">
         <div className="content-wrapper">
           <h1 className="header">
             Country Finder
